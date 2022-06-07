@@ -1,0 +1,69 @@
+name: Create terraform plan
+
+on:
+  workflow_call:
+    inputs:
+      terraform_root_directory:
+        default: 'terraform/environments'
+        description: 'Terraform root directory'
+        required: false
+        type: string
+      exclude_environment:
+        default: "\n"
+        description: 'Exclude any environment from list'
+        required: false
+        type: string
+      aws_role:
+        description: 'Role to run terraform plan'
+        required: true
+        type: string
+      runner:
+        default: "ubuntu-latest"
+        description: 'Runner used to run all commands'
+        required: false 
+        type: string
+
+jobs:
+  find_environments:
+    permissions: write-all
+    outputs:
+      files_changed_boolean: ${{ steps.unique_directory_array.outputs.files_changed_boolean }}
+      unique_directory_matrix: ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
+    runs-on: ubuntu-latest
+    name: Find all environments
+    steps:
+      - name: Find all unique environments
+        uses: pepsico-ecommerce/github_actions_helpers/composite-actions/find-subdir@main
+        id: unique_directory_array
+        with:
+          filter_directory: ${{ inputs.terraform_root_directory }}
+          exclude_subdirectory: ${{ inputs.exclude_environment }}
+      - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
+
+  plan:
+    permissions: write-all
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
+    needs: find_environments
+    name: Create a plan for an example terraform configuration
+    env:
+      TERRAFORM_PRE_RUN: |
+                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: AWS log in
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.aws_role }} 
+          aws-region: us-east-1
+      - name: terraform plan
+        uses: pepsico-ecommerce/github_actions_helpers/terraform-github-actions/terraform-plan@main
+        with:
+          path: ./${{ matrix.environment }}
