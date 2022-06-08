@@ -1,0 +1,25 @@
+name: Create terraform plan
+
+on:
+  workflow_call:
+    inputs:
+      modified_tag:
+        default: false
+        description: 'Tag should add suffix. Mostly used by external actions'
+        required: false
+        type: boolean
+
+jobs:
+  git_tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Bump version and push tag
+      uses: pepsico-ecommerce/ops-gh-actions-github-tag-action@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch
+        WITH_V: true
+        RELEASE_BRANCHES: "notmain"
