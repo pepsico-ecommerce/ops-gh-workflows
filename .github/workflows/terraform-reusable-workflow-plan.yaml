@@ -33,7 +33,7 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/github_actions_helpers/composite-actions/find-subdir@main
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
@@ -64,6 +64,6 @@ jobs:
           role-to-assume: ${{ inputs.aws_role }} 
           aws-region: us-east-1
       - name: terraform plan
-        uses: pepsico-ecommerce/github_actions_helpers/terraform-github-actions/terraform-plan@main
+        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions@v1.26.0
         with:
           path: ./${{ matrix.environment }}
