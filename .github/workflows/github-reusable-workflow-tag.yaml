@@ -30,7 +30,8 @@ jobs:
         WITH_V: ${{ inputs.with_v }}
         RELEASE_BRANCHES: " "
         PRERELEASE_SUFFIX: "modified"
-    - name: Bump version and push tag
+    - if: ! ${{ inputs.modified_tag }}
+      name: Bump version and push tag
       uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
