@@ -1,9 +1,0 @@
-name: Github Tag Workflow
-
-on:
-  push: [ main ]
-
-jobs:
-  github-tag:
-    uses:  pepsico-ecommerce/ops-gh-workflows/.github/workflows/github-reusable-workflow-tag.yaml@v1.0.0
-    secrets: inherit
