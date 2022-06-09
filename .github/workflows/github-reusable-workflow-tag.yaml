@@ -8,6 +8,11 @@ on:
         description: 'Tag should add suffix. Mostly used by external actions'
         required: false
         type: boolean
+      with_v:
+        default: true
+        description: 'Add v to version if required'
+        required: false
+        type: boolean
 
 jobs:
   git-tag:
@@ -18,18 +23,18 @@ jobs:
         fetch-depth: 0
     - if: ${{ inputs.modified_tag }}
       name: Bump version and push modified tag
-      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@v1.0.0
+      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
-        WITH_V: true
+        WITH_V: ${{ inputs.with_v }}
         RELEASE_BRANCHES: " "
         PRERELEASE_SUFFIX: "modified"
     - name: Bump version and push tag
-      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@v1.0.0
+      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
-        WITH_V: true
+        WITH_V: ${{ inputs.with_v }}
 
 
