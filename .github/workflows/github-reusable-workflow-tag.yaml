@@ -37,4 +37,3 @@ jobs:
         DEFAULT_BUMP: patch
         WITH_V: ${{ inputs.with_v }}
 
-
