@@ -64,6 +64,6 @@ jobs:
           role-to-assume: ${{ inputs.aws_role }} 
           aws-region: us-east-1
       - name: terraform plan
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions@v1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}
