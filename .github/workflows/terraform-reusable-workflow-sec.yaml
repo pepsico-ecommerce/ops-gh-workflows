@@ -18,6 +18,11 @@ on:
         description: 'Runner used to run all commands'
         required: false 
         type: string
+      snyk_token:
+        default: ""
+        description: 'Snyk token for running scan'
+        required: true 
+        type: string
 
 jobs:
   find_environments:
@@ -46,7 +51,7 @@ jobs:
     needs: find_environments
     name: IAC scan
     env:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_TOKEN: ${{ inputs.snyk_token }}
       SNYK_CFG_ORG: digital-technology-and-experience-dtx
     steps:
       - name: Checkout
