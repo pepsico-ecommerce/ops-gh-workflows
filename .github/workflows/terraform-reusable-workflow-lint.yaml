@@ -63,7 +63,7 @@ jobs:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
       - name: terraform validate
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-validate@1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-validate@v1.26.0
         with:
           path: ./${{ matrix.environment }}
 
