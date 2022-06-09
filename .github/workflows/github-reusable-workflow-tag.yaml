@@ -10,14 +10,14 @@ on:
         type: boolean
 
 jobs:
-  git_tag:
+  git-tag:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
     - name: Bump version and push modified tag
-      if: ${{ inputs.modified_tag }}
+      if: ${{ inputs.modified_tag == 'true' }}
       uses: pepsico-ecommerce/ops-gh-actions-github-tag-action@v1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,7 +26,7 @@ jobs:
         RELEASE_BRANCHES: " "
         PRERELEASE_SUFFIX: "modified"
     - name: Bump version and push tag
-      if: ! ${{ inputs.modified_tag }}
+      if: ${{ inputs.modified_tag == 'false' }}
       uses: pepsico-ecommerce/ops-gh-actions-github-tag-action@v1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
