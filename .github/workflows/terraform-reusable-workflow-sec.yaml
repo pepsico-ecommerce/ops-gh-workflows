@@ -1,4 +1,4 @@
-name: Apply terraform plan
+name: Terraform Snyk
 
 on:
   workflow_call:
@@ -12,10 +12,6 @@ on:
         default: "\n"
         description: 'Exclude any environment from list'
         required: false
-        type: string
-      aws_role:
-        description: 'Role to run terraform plan'
-        required: true
         type: string
       runner:
         default: "ubuntu-latest"
@@ -40,7 +36,7 @@ jobs:
           exclude_subdirectory: ${{ inputs.exclude_environment }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
 
-  apply:
+  sec:
     permissions: write-all
     strategy:
       matrix:
@@ -48,22 +44,23 @@ jobs:
     if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
     runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Apply tf plan from PR
+    name: IAC scan
     env:
-      TERRAFORM_PRE_RUN: |
-                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_CFG_ORG: digital-technology-and-experience-dtx
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: AWS log in
-        uses: aws-actions/configure-aws-credentials@v1
+
+      - name: Run Snyk to check configuration files for security issues
+        # Snyk can be used to break the build when it detects security issues.
+        # In this case we want to upload the issues to GitHub Code Scanning
+        continue-on-error: true
+        uses: snyk/actions/iac@master
         with:
-          role-to-assume: ${{ inputs.aws_role }} 
-          aws-region: us-east-1
-      - name: terraform apply
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
+          file: ./${{ matrix.environment }}
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
         with:
-          path: ./${{ matrix.environment }}
+          sarif_file: snyk.sarif
