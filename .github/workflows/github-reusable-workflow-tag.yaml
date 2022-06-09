@@ -26,7 +26,6 @@ jobs:
     #    RELEASE_BRANCHES: " "
     #    PRERELEASE_SUFFIX: "modified"
     - name: Bump version and push tag
-      if: ${{ inputs.modified_tag == 'false' }}
       uses: pepsico-ecommerce/ops-gh-actions-github-tag-action@v1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
