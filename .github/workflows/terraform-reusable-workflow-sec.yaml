@@ -18,11 +18,10 @@ on:
         description: 'Runner used to run all commands'
         required: false 
         type: string
+    secrets:
       snyk_token:
-        default: ""
         description: 'Snyk token for running scan'
-        required: true 
-        type: string
+        required: true
 
 jobs:
   find_environments:
