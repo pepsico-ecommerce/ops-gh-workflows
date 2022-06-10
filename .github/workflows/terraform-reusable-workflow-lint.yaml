@@ -13,10 +13,6 @@ on:
         description: 'Exclude any environment from list'
         required: false
         type: string
-      aws_role:
-        description: 'Role to run terraform plan'
-        required: true
-        type: string
       runner:
         default: "ubuntu-latest"
         description: 'Runner used to run all commands'
@@ -58,11 +54,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: AWS log in
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ inputs.aws_role }} 
-          aws-region: us-east-1
       - name: terraform lint
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
         with:
