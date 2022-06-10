@@ -72,8 +72,9 @@ jobs:
         if: ${{ inputs.terraform_target != '' }}
         id: check_target
         run: |
-          targets=$(printf '${{ inputs.terraform_target }}' | tr ',' '\n')
-          echo "::set-output name=targets::$targets"
+          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | tr ',' '\n')
+          echo "$TF_TARGETS" >> $GITHUB_ENV
+          #echo "::set-output name=targets::$targets"
       - name: terraform plan
         if: ${{ steps.check_target.outputs.targets == '' }}
         uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-plan@v1.26.0
@@ -85,4 +86,4 @@ jobs:
         with:
           path: ./${{ matrix.environment }}
           target: |
-            ${{ steps.check_target.outputs.targets }}
+            ${{ env.TF_TARGETS }}
