@@ -64,7 +64,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: AWS log in
         uses: aws-actions/configure-aws-credentials@v1
         with:
