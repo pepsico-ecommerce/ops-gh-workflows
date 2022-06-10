@@ -72,11 +72,7 @@ jobs:
         if: ${{ inputs.terraform_target != '' }}
         id: check_target
         run: |
-          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | tr ',' '/n')
-          #echo "$TF_TARGETS" >> $GITHUB_ENV
-          content="${TF_TARGETS//'%'/'%25'}"
-          content="${TF_TARGETS//$'\n'/'%0A'}"
-          content="${TF_TARGETS//$'\r'/'%0D'}"
+          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
           echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform plan
         if: ${{ steps.check_target.outputs.targets == '' }}
