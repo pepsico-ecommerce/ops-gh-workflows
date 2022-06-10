@@ -86,4 +86,4 @@ jobs:
         with:
           path: ./${{ matrix.environment }}
           target: |
-            ${{ env.TF_TARGETS }}
+            ${{ steps.check_target.outputs.targets }}
