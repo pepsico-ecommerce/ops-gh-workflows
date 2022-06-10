@@ -1,4 +1,4 @@
-name: Terraform Lint
+name: Terraform lint
 
 on:
   workflow_call:
@@ -8,9 +8,24 @@ on:
         description: 'Terraform root directory'
         required: false
         type: string
+      exclude_environment:
+        default: "\n"
+        description: 'Exclude any environment from list'
+        required: false
+        type: string
+      aws_role:
+        description: 'Role to run terraform plan'
+        required: true
+        type: string
+      runner:
+        default: "ubuntu-latest"
+        description: 'Runner used to run all commands'
+        required: false 
+        type: string
 
 jobs:
   find_environments:
+    permissions: write-all
     outputs:
       files_changed_boolean: ${{ steps.unique_directory_array.outputs.files_changed_boolean }}
       unique_directory_matrix: ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
@@ -18,50 +33,37 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/docker_composite_poc@main
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
-  lint:
-    strategy:
-      matrix:
-        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-    if: ${{ needs.find_environments.outputs.files_changed_boolean }} == true
-    runs-on: ubuntu-latest
-    needs: find_environments
-    name: Lint terraform files 
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_TOKEN : ${{ secrets.GITHUB_TOKEN }}
-      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-      TERRAFORM_VERSION: "0.13"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: terraform validate
-        uses: dflook/terraform-validate@v1
-        with:
-          path: ./${{ matrix.environment }}
+          exclude_subdirectory: ${{ inputs.exclude_environment }}
+      - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
 
-  fmt-check:
+  plan:
+    permissions: write-all
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-    if: ${{ needs.find_environments.outputs.files_changed_boolean }} == true
-    runs-on: ubuntu-latest
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Lint terraform files
+    name: Create a plan for an example terraform configuration
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_TOKEN : ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_PRE_RUN: |
+                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-      TERRAFORM_VERSION: "0.13"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: terraform fmt
-        uses: dflook/terraform-fmt-check@v1
+      - name: AWS log in
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.aws_role }} 
+          aws-region: us-east-1
+      - name: terraform lint
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
         with:
           path: ./${{ matrix.environment }}
