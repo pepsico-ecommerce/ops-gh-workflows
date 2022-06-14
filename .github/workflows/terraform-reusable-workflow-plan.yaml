@@ -58,7 +58,7 @@ jobs:
       TERRAFORM_PRE_RUN: |
                          export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
                          [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
-                         [[ -z "${{ inputs.terraform_target }}" ]] || export TF_CLI_ARGS=$(awk -F, -v OFS=' ' -vpre="-target " '{ for (i=1;i<=NF;++i) $i = pre $i; print }')
+                         [[ -z "${{ inputs.terraform_target }}" ]] || export TF_CLI_ARGS=$(printf ${{ inputs.terraform_target }} | awk -F, -v OFS=' ' -vpre="-target " '{ for (i=1;i<=NF;++i) $i = pre $i; print }')
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
