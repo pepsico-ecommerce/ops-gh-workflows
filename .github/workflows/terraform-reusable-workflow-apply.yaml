@@ -96,7 +96,7 @@ jobs:
       #       **/*.yaml
       #       **/*.yml
       - name: Commit changed files
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        #if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: EndBug/add-and-commit@v9
         id: committed-files
         with:
