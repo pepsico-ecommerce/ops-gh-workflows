@@ -16,7 +16,7 @@ on:
       runner:
         default: "ubuntu-latest"
         description: 'Runner used to run all commands'
-        required: false 
+        required: false
         type: string
     secrets:
       snyk_token:

@@ -57,7 +57,8 @@ jobs:
     env:
       TERRAFORM_PRE_RUN: |
                          export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
+                         [[ -z "${{ inputs.terraform_target }}" ]] || export TF_CLI_ARGS=$(awk -F, -v OFS=' ' -vpre="-target " '{ for (i=1;i<=NF;++i) $i = pre $i; print }')
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
@@ -70,24 +71,24 @@ jobs:
         with:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
-      - name: Check target
-        if: ${{ inputs.terraform_target != '' }}
-        id: check_target
-        run: |
-          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
-          echo "::set-output name=targets::$TF_TARGETS"
+      # - name: Check target
+      #   if: ${{ inputs.terraform_target != '' }}
+      #   id: check_target
+      #   run: |
+      #     TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
+      #     echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform apply
-        if: ${{ steps.check_target.outputs.targets == '' }}
+        #if: ${{ steps.check_target.outputs.targets == '' }}
         uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
         with:
           path: ./${{ matrix.environment }}
-      - name: terraform apply by target
-        if: ${{ steps.check_target.outputs.targets != '' }}
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
-        with:
-          path: ./${{ matrix.environment }}
-          target: |
-            ${{ steps.check_target.outputs.targets }}
+      # - name: terraform apply by target
+      #   if: ${{ steps.check_target.outputs.targets != '' }}
+      #   uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
+      #   with:
+      #     path: ./${{ matrix.environment }}
+      #     target: |
+      #       ${{ steps.check_target.outputs.targets }}
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v9.1
         id: verify-changed-files
