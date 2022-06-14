@@ -1,0 +1,40 @@
+name: Github Tag
+
+on:
+  workflow_call:
+    inputs:
+      modified_tag:
+        default: false
+        description: 'Tag should add suffix. Mostly used by external actions'
+        required: false
+        type: boolean
+      with_v:
+        default: true
+        description: 'Add v to version if required'
+        required: false
+        type: boolean
+
+jobs:
+  git-tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - if: ${{ inputs.modified_tag }}
+      name: Bump version and push modified tag
+      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@1.39.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch
+        WITH_V: ${{ inputs.with_v }}
+        RELEASE_BRANCHES: " "
+        PRERELEASE_SUFFIX: "modified"
+    - if: ${{ inputs.modified_tag }} == 'false'
+      name: Bump version and push tag
+      uses: pepsico-ecommerce/ops-gh-actions-ext-github-tag-action@1.39.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch
+        WITH_V: ${{ inputs.with_v }}
+

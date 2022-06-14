@@ -76,12 +76,12 @@ jobs:
           echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform plan
         if: ${{ steps.check_target.outputs.targets == '' }}
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-plan@v1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}
       - name: terraform plan by target
         if: ${{ steps.check_target.outputs.targets != '' }}
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-plan@v1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}
           target: |

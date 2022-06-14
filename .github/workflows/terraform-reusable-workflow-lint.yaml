@@ -1,4 +1,4 @@
-name: Terraform Lint
+name: Terraform lint
 
 on:
   workflow_call:
@@ -12,10 +12,6 @@ on:
         default: "\n"
         description: 'Exclude any environment from list'
         required: false
-        type: string
-      aws_role:
-        description: 'Role to run terraform plan'
-        required: true
         type: string
       runner:
         default: "ubuntu-latest"
@@ -39,7 +35,7 @@ jobs:
           filter_directory: ${{ inputs.terraform_root_directory }}
           exclude_subdirectory: ${{ inputs.exclude_environment }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
-  lint:
+  fmt:
     permissions: write-all
     strategy:
       matrix:
@@ -47,50 +43,17 @@ jobs:
     if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
     runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Lint tf files
+    name: Format terraform
     env:
       TERRAFORM_PRE_RUN: |
                          export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: AWS log in
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ inputs.aws_role }}
-          aws-region: us-east-1
-      - name: terraform validate
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-validate@v1.26.0
-        with:
-          path: ./${{ matrix.environment }}
-
-  fmt:
-    permissions: write-all
-    strategy:
-      matrix:
-        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }} == true
-    runs-on: ${{ inputs.runner }}
-    needs: find_environments
-    name: Format tf files
-    env:
-      TERRAFORM_PRE_RUN: |
-                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: AWS log in
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ inputs.aws_role }}
-          aws-region: us-east-1
       - name: terraform fmt
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-fmt-check@v1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
         with:
           path: ./${{ matrix.environment }}
