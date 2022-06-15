@@ -1,4 +1,4 @@
-name: Terraform apply
+name: Apply terraform plan
 
 on:
   workflow_call:
@@ -8,9 +8,29 @@ on:
         description: 'Terraform root directory'
         required: false
         type: string
+      exclude_environment:
+        default: "\n"
+        description: 'Exclude any environment from list'
+        required: false
+        type: string
+      terraform_target:
+        default: ''
+        description: 'value for the terraform -target parameter, comma separate'
+        required: false
+        type: string
+      aws_role:
+        description: 'Role to run terraform plan'
+        required: true
+        type: string
+      runner:
+        default: "ubuntu-latest"
+        description: 'Runner used to run all commands'
+        required: false
+        type: string
 
 jobs:
   find_environments:
+    permissions: write-all
     outputs:
       files_changed_boolean: ${{ steps.unique_directory_array.outputs.files_changed_boolean }}
       unique_directory_matrix: ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
@@ -18,29 +38,62 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/docker_composite_poc@main
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
-  plan:
+          exclude_subdirectory: ${{ inputs.exclude_environment }}
+      - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
+
+  apply:
+    permissions: write-all
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-    if: ${{ needs.find_environments.outputs.files_changed_boolean }} == true
-    runs-on: ubuntu-latest
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Create a plan for an example terraform configuration
+    name: Apply tf plan from PR
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_TOKEN : ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_PRE_RUN: |
+                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-      TERRAFORM_VERSION: "0.13"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: terraform apply
-        uses: dflook/terraform-apply@v1
         with:
-          path: ./${{ matrix.environment }} 
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: AWS log in
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.aws_role }}
+          aws-region: us-east-1
+      - name: Check target
+        if: ${{ inputs.terraform_target != '' }}
+        id: check_target
+        run: |
+          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
+          echo "::set-output name=targets::$TF_TARGETS"
+      - name: terraform apply
+        if: ${{ steps.check_target.outputs.targets == '' }}
+        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
+        with:
+          path: ./${{ matrix.environment }}
+      - name: terraform apply by target
+        if: ${{ steps.check_target.outputs.targets != '' }}
+        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
+        with:
+          path: ./${{ matrix.environment }}
+          target: |
+            ${{ steps.check_target.outputs.targets }}
+      - name: Commit changed files
+        uses: EndBug/add-and-commit@v9
+        id: committed-files
+        with:
+          message: 'k8s manifests for ${{ matrix.environment }}'
+          author_name: pepecommops
+          author_email: PEPeCommInfra@pepsico.com
+          add: '*.yaml *.yml'
+          pull: '-v'

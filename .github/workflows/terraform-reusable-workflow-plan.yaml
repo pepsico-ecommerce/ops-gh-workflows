@@ -13,6 +13,11 @@ on:
         description: 'Exclude any environment from list'
         required: false
         type: string
+      terraform_target:
+        default: ''
+        description: 'value for the terraform -target parameter, comma separate'
+        required: false
+        type: string
       aws_role:
         description: 'Role to run terraform plan'
         required: true
@@ -20,7 +25,7 @@ on:
       runner:
         default: "ubuntu-latest"
         description: 'Runner used to run all commands'
-        required: false 
+        required: false
         type: string
 
 jobs:
@@ -48,11 +53,11 @@ jobs:
     if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
     runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Create a plan for an example terraform configuration
+    name: Create a tf plan for 
     env:
       TERRAFORM_PRE_RUN: |
                          export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true 
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
@@ -61,9 +66,23 @@ jobs:
       - name: AWS log in
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ inputs.aws_role }} 
+          role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
+      - name: Check target
+        if: ${{ inputs.terraform_target != '' }}
+        id: check_target
+        run: |
+          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
+          echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform plan
+        if: ${{ steps.check_target.outputs.targets == '' }}
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}
+      - name: terraform plan by target
+        if: ${{ steps.check_target.outputs.targets != '' }}
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
+        with:
+          path: ./${{ matrix.environment }}
+          target: |
+            ${{ steps.check_target.outputs.targets }}
