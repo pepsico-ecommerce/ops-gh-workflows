@@ -96,6 +96,7 @@ jobs:
           author_name: pepecommops
           author_email: PEPeCommInfra@pepsico.com
           add: '*.yaml *.yml'
-          pull: '--rebase --autostash && git stash pop'
+          #pull: '--rebase --autostash'
+          pull: '-v'
 
 
