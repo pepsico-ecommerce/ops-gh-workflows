@@ -13,6 +13,10 @@ on:
         description: 'Exclude any environment from list'
         required: false
         type: string
+      aws_role:
+        description: 'Role to run terraform plan'
+        required: true
+        type: string
       runner:
         default: "ubuntu-latest"
         description: 'Runner used to run all commands'
