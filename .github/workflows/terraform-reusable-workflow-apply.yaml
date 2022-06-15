@@ -92,7 +92,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         id: committed-files
         with:
-          message: 'Add manifests generated after terraform apply'
+          message: 'k8s manifests for ${{ matrix.environment }}'
           author_name: pepecommops
           author_email: PEPeCommInfra@pepsico.com
           add: '*.yaml *.yml'
