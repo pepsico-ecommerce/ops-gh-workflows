@@ -97,5 +97,3 @@ jobs:
           author_email: PEPeCommInfra@pepsico.com
           add: '*.yaml *.yml'
           pull: '-v'
-
-
