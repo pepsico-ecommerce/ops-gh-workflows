@@ -20,7 +20,12 @@ on:
       runner:
         default: "ubuntu-latest"
         description: 'Runner used to run all commands'
-        required: false 
+        required: false
+        type: string
+      git_branch:
+        default: ""
+        description: 'custom branch for checkout'
+        required: false
         type: string
 
 jobs:
@@ -33,11 +38,12 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@DEV-2133
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
           exclude_subdirectory: ${{ inputs.exclude_environment }}
+          git_branch: ${{ inputs.git_branch }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
   validate:
     permissions: write-all
@@ -56,6 +62,12 @@ jobs:
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
+        if: inputs.git_branch != ''
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
+      - name: Checkout
+        if: inputs.git_branch == ''
         uses: actions/checkout@v2
       - name: terraform validate
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-validate@v1.26.0
@@ -78,6 +90,12 @@ jobs:
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
+        if: inputs.git_branch != ''
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
+      - name: Checkout
+        if: inputs.git_branch == ''
         uses: actions/checkout@v2
       - name: terraform fmt
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
