@@ -53,7 +53,7 @@ jobs:
     if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
     runs-on: ${{ inputs.runner }}
     needs: find_environments
-    name: Create a tf plan for environment
+    name: Create a tf plan for 
     env:
       TERRAFORM_PRE_RUN: |
                          export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
