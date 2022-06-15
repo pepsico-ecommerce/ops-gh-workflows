@@ -38,7 +38,7 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@DEV-2133
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.1
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
