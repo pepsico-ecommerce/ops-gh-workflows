@@ -65,13 +65,9 @@ jobs:
       SNYK_CFG_ORG: digital-technology-and-experience-dtx
     steps:
       - name: Checkout
-        if: inputs.git_branch != ''
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
-      - name: Checkout
-        if: inputs.git_branch == ''
-        uses: actions/checkout@v2
 
       - name: Run Snyk to check configuration files for security issues
         # Snyk can be used to break the build when it detects security issues.

@@ -68,13 +68,9 @@ jobs:
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
-        if: inputs.git_branch != ''
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
-      - name: Checkout
-        if: inputs.git_branch == ''
-        uses: actions/checkout@v2
       - name: AWS log in
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -86,13 +82,7 @@ jobs:
         run: |
           TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
           echo "::set-output name=targets::$TF_TARGETS"
-      # - name: terraform plan
-      #   if: ${{ steps.check_target.outputs.targets == '' }}
-      #   uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
-      #   with:
-      #     path: ./${{ matrix.environment }}
       - name: terraform plan
-        #if: ${{ steps.check_target.outputs.targets != '' }}
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}

@@ -62,13 +62,9 @@ jobs:
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
-        if: inputs.git_branch != ''
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
-      - name: Checkout
-        if: inputs.git_branch == ''
-        uses: actions/checkout@v2
       - name: terraform validate
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-validate@v1.26.0
         with:
@@ -90,13 +86,9 @@ jobs:
       TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
-        if: inputs.git_branch != ''
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
-      - name: Checkout
-        if: inputs.git_branch == ''
-        uses: actions/checkout@v2
       - name: terraform fmt
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
         with:
