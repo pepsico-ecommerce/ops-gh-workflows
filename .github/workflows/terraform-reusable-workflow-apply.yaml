@@ -97,6 +97,7 @@ jobs:
           author_email: PEPeCommInfra@pepsico.com
           add: '*.yaml *.yml'
           #pull: '--rebase --autostash'
-          pull: '-v'
+          pull: '--rebase=merges --autostash'
+          #pull: '-v'
 
 
