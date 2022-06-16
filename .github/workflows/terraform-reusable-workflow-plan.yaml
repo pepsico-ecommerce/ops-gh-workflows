@@ -27,6 +27,11 @@ on:
         description: 'Runner used to run all commands'
         required: false
         type: string
+      git_branch:
+        default: ""
+        description: 'custom branch for checkout'
+        required: false
+        type: string
 
 jobs:
   find_environments:
@@ -38,11 +43,12 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.1
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
           exclude_subdirectory: ${{ inputs.exclude_environment }}
+          git_branch: ${{ inputs.git_branch }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
 
   plan:
@@ -63,6 +69,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
       - name: AWS log in
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -75,12 +83,6 @@ jobs:
           TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
           echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform plan
-        if: ${{ steps.check_target.outputs.targets == '' }}
-        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
-        with:
-          path: ./${{ matrix.environment }}
-      - name: terraform plan by target
-        if: ${{ steps.check_target.outputs.targets != '' }}
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}

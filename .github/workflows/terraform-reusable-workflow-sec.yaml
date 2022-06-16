@@ -18,6 +18,16 @@ on:
         description: 'Runner used to run all commands'
         required: false
         type: string
+      git_branch:
+        default: ""
+        description: 'custom branch for checkout'
+        required: false
+        type: string
+      continue_on_error:
+        type: boolean
+        default: false
+        required: false
+        description: 'if workflow should complete on error'
     secrets:
       snyk_token:
         description: 'Snyk token for running scan'
@@ -33,11 +43,12 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.0
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.1
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
           exclude_subdirectory: ${{ inputs.exclude_environment }}
+          git_branch: ${{ inputs.git_branch }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
 
   sec:
@@ -55,11 +66,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
 
       - name: Run Snyk to check configuration files for security issues
         # Snyk can be used to break the build when it detects security issues.
         # In this case we want to upload the issues to GitHub Code Scanning
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue_on_error }}
         uses: snyk/actions/iac@master
         with:
           file: ./${{ matrix.environment }}
