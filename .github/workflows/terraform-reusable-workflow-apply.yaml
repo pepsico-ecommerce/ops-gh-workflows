@@ -37,11 +37,6 @@ on:
         description: 'Branch, tag, or commit SHA against which the changes will be detected.'
         required: false
         type: string
-      auto_approve:
-        default: false
-        description: 'Automatically generates plan if missing PR'
-        required: false
-        type: boolean
 
 jobs:
   find_environments:
@@ -97,7 +92,6 @@ jobs:
         uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
         with:
           path: ./${{ matrix.environment }}
-          auto_approve: ${{ inputs.auto_approve }}
           target: |
             ${{ steps.check_target.outputs.targets }}
       - name: Commit changed files
