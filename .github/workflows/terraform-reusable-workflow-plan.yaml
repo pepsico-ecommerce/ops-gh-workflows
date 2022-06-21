@@ -32,6 +32,11 @@ on:
         description: 'custom branch for checkout'
         required: false
         type: string
+      git_base:
+        default: ""
+        description: 'Branch, tag, or commit SHA against which the changes will be detected.'
+        required: false
+        type: string
 
 jobs:
   find_environments:
@@ -43,12 +48,13 @@ jobs:
     name: Find all environments
     steps:
       - name: Find all unique environments
-        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.1
+        uses: pepsico-ecommerce/ops-gh-actions-comp-find-subdir@v1.0.2
         id: unique_directory_array
         with:
           filter_directory: ${{ inputs.terraform_root_directory }}
           exclude_subdirectory: ${{ inputs.exclude_environment }}
           git_branch: ${{ inputs.git_branch }}
+          git_base: ${{ inputs.git_base }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
 
   plan:
