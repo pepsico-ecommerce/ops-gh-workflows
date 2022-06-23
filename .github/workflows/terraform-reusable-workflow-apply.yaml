@@ -87,19 +87,12 @@ jobs:
         with:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
-      - name: Check target
-        if: ${{ inputs.terraform_target != '' }}
-        id: check_target
-        run: |
-          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
-          echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform apply
         uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
         with:
           path: ./${{ matrix.environment }}
           auto_approve: ${{ inputs.auto_approve }}
-          target: |
-            ${{ steps.check_target.outputs.targets }}
+          target: ${{ inputs.terraform_target }}
       - name: Commit changed files
         uses: EndBug/add-and-commit@v9
         id: committed-files
