@@ -82,14 +82,8 @@ jobs:
         with:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
-#      - name: Check target
-#        if: ${{ inputs.terraform_target != '' }}
-#        id: check_target
-#        run: |
-#          TF_TARGETS=$(printf '${{ inputs.terraform_target }}' | sed 's/,/%0A/g')
-#          echo "::set-output name=targets::$TF_TARGETS"
       - name: terraform plan
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
         with:
           path: ./${{ matrix.environment }}
-          target: ${{ steps.check_target.outputs.targets }}
+          target: ${{ inputs.terraform_target }}
