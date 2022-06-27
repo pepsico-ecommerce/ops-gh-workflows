@@ -123,6 +123,7 @@ jobs:
           ssh-private-key: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
 
       - name: terraform init
+        working-directory: ./${{ matrix.environment }}
         run: |
           git clone https://github.com/tfutils/tfenv.git ~/.local
           terraform --version
