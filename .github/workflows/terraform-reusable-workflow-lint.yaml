@@ -125,6 +125,7 @@ jobs:
       - name: terraform init
         run: |
           git clone https://github.com/tfutils/tfenv.git ~/.local
+          terraform --version
           terraform init -backend=false
 
       - name: tflint
