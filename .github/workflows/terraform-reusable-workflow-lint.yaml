@@ -110,6 +110,7 @@ jobs:
     name: TFLint
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
