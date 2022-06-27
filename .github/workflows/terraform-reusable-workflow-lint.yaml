@@ -129,10 +129,13 @@ jobs:
           terraform --version
           terraform init -backend=false
 
-      - name: tflint
-        uses: reviewdog/action-tflint@master
+      - name: Install TFLint
+        uses: terraform-linters/setup-tflint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          fail_on_error: "true"
-          working_directory: "./${{ matrix.environment }}"
-          tflint_init: "true"
+
+      - name: Init TFLint
+        run: tflint --init -c $GITHUB_WORKSPACE/.tflint.hcl
+
+      - name: Run TFLint
+        run: tflint -f compact --module -c $GITHUB_WORKSPACE/.tflint.hcl
