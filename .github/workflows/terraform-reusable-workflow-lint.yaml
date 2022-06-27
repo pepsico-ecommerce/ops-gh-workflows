@@ -134,14 +134,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      # TFLint looks up .tflint.hcl according to the following priority:
+      # Current directory (./.tflint.hcl)
+      # Home directory (~/.tflint.hcl)
       - name: Init TFLint
         run: tflint --init
 
       - name: Run TFLint
         run: tflint
-
-      # - name: Init TFLint
-      #   run: tflint --init -c $GITHUB_WORKSPACE/.tflint.hcl
-
-      # - name: Run TFLint
-      #   run: tflint -f compact --module -c $GITHUB_WORKSPACE/.tflint.hcl
