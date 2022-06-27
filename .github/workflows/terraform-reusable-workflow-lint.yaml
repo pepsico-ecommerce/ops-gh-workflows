@@ -128,7 +128,7 @@ jobs:
 
       - run: |
           ls -la
-          ls -la /tmp/terraform-data-dir/modules/
+          sleep 600
 
       - name: tflint
         uses: reviewdog/action-tflint@master
