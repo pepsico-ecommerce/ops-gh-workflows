@@ -135,7 +135,13 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Init TFLint
-        run: tflint --init -c $GITHUB_WORKSPACE/.tflint.hcl
+        run: tflint --init
 
       - name: Run TFLint
-        run: tflint -f compact --module -c $GITHUB_WORKSPACE/.tflint.hcl
+        run: tflint -f compact --module
+
+      # - name: Init TFLint
+      #   run: tflint --init -c $GITHUB_WORKSPACE/.tflint.hcl
+
+      # - name: Run TFLint
+      #   run: tflint -f compact --module -c $GITHUB_WORKSPACE/.tflint.hcl
