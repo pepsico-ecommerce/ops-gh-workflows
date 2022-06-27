@@ -126,6 +126,10 @@ jobs:
       - name: Print the version
         run: echo "The terraform version was ${{ steps.terraform-version.outputs.terraform }}"
 
+      - run: |
+          ls -la
+          la -la /tmp/terraform-data-dir/modules/
+
       - name: tflint
         uses: reviewdog/action-tflint@master
         with:
