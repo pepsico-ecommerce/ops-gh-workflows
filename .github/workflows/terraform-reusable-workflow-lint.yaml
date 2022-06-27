@@ -117,23 +117,20 @@ jobs:
         with:
           ref: ${{ inputs.git_branch }}
 
-      - name: Test terraform-version
-        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-version@v1.26.0
-        id: terraform-version
+      - name: Installs SSH key
+        uses: webfactory/ssh-agent@v0.5.2
         with:
-          path: ./${{ matrix.environment }}
+          ssh-private-key: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
 
-      - name: Print the version
-        run: echo "The terraform version was ${{ steps.terraform-version.outputs.terraform }}"
-
-      - run: |
-          ls -la
-          sleep 600
+      - name: terraform init
+        run: |
+          git clone https://github.com/tfutils/tfenv.git ~/.local
+          terraform init -backend=false
 
       - name: tflint
         uses: reviewdog/action-tflint@master
         with:
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_error: "true"
           working_directory: "./${{ matrix.environment }}"
-          flags: "--module"
+          tflint_init: "true"
