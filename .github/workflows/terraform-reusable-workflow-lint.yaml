@@ -51,54 +51,54 @@ jobs:
           git_branch: ${{ inputs.git_branch }}
           git_base: ${{ inputs.git_base }}
       - run: echo ${{ steps.unique_directory_array.outputs.unique_directory_matrix }}
-  # validate:
-  #   permissions: write-all
-  #   strategy:
-  #     matrix:
-  #       environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-  #   if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
-  #   runs-on: ${{ inputs.runner }}
-  #   needs: find_environments
-  #   name: Validate terraform
-  #   env:
-  #     TERRAFORM_PRE_RUN: |
-  #                        export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-  #                        [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         ref: ${{ inputs.git_branch }}
-  #     - name: terraform validate
-  #       uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-validate@v1.26.0
-  #       with:
-  #         path: ./${{ matrix.environment }}
-  # fmt:
-  #   permissions: write-all
-  #   strategy:
-  #     matrix:
-  #       environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
-  #   if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
-  #   runs-on: ${{ inputs.runner }}
-  #   needs: find_environments
-  #   name: Format terraform
-  #   env:
-  #     TERRAFORM_PRE_RUN: |
-  #                        export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
-  #                        [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         ref: ${{ inputs.git_branch }}
-  #     - name: terraform fmt
-  #       uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
-  #       with:
-  #         path: ./${{ matrix.environment }}
+  validate:
+    permissions: write-all
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
+    needs: find_environments
+    name: Validate terraform
+    env:
+      TERRAFORM_PRE_RUN: |
+                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
+      - name: terraform validate
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-validate@v1.26.0
+        with:
+          path: ./${{ matrix.environment }}
+  fmt:
+    permissions: write-all
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
+    needs: find_environments
+    name: Format terraform
+    env:
+      TERRAFORM_PRE_RUN: |
+                         export TERRAFORM_VERSION=$(cat ${{ matrix.environment }}/.terraform-version)
+                         [[ -f "./${{ matrix.environment }}/.envrc" ]] && source ./${{ matrix.environment }}/.envrc || true
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
+      - name: terraform fmt
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
+        with:
+          path: ./${{ matrix.environment }}
   tflint:
     permissions: write-all
     strategy:
