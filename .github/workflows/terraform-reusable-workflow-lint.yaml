@@ -99,3 +99,29 @@ jobs:
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-fmt-check@v1.26.0
         with:
           path: ./${{ matrix.environment }}
+  tflint:
+    permissions: write-all
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
+    if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
+    runs-on: ${{ inputs.runner }}
+    needs: find_environments
+    name: TFLint
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.git_branch }}
+      - name: AWS log in
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.aws_role }}
+          aws-region: us-east-1
+      - name: Run TFLint
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@v1.26.1-beta
+        with:
+          path: ./${{ matrix.environment }}
