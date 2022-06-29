@@ -116,6 +116,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
+      - name: AWS log in
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.aws_role }}
+          aws-region: us-east-1
       - name: Run TFLint
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@DEV-2221
         with:
