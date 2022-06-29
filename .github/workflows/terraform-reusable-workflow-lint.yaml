@@ -122,6 +122,6 @@ jobs:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
       - name: Run TFLint
-        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@DEV-2221
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@v1.26.1-beta
         with:
           path: ./${{ matrix.environment }}
