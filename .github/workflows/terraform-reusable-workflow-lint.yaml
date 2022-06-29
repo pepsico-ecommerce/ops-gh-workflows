@@ -108,37 +108,12 @@ jobs:
     runs-on: ${{ inputs.runner }}
     needs: find_environments
     name: TFLint
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TERRAFORM_SSH_KEY: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ inputs.git_branch }}
-
-      - name: Installs SSH key
-        uses: webfactory/ssh-agent@v0.5.2
-        with:
-          ssh-private-key: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
-
-      - name: terraform init
-        working-directory: ./${{ matrix.environment }}
-        run: |
-          git clone https://github.com/tfutils/tfenv.git ~/.local
-          terraform --version
-          terraform init -backend=false
-
-      - name: Install TFLint
-        uses: terraform-linters/setup-tflint@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # TFLint looks up .tflint.hcl according to the following priority:
-      # Current directory (./.tflint.hcl)
-      # Home directory (~/.tflint.hcl)
-      - name: Init TFLint
-        run: tflint --init
-
       - name: Run TFLint
-        run: tflint
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@DEV-2221
+        with:
+          path: ./${{ matrix.environment }}
