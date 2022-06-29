@@ -117,3 +117,4 @@ jobs:
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-tflint@DEV-2221
         with:
           path: ./${{ matrix.environment }}
+          ssh_key: ${{ secrets.GH_USER_PEPECOMMOPS_SSH_KEY_PRIVATE }}
