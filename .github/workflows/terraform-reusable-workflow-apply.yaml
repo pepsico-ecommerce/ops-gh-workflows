@@ -88,7 +88,7 @@ jobs:
           role-to-assume: ${{ inputs.aws_role }}
           aws-region: us-east-1
       - name: terraform apply
-        uses: pepsico-ecommerce/ops-gh-actions-terraform-github-actions/terraform-apply@v1.26.0
+        uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-apply@v1.26.0
         with:
           path: ./${{ matrix.environment }}
           auto_approve: ${{ inputs.auto_approve }}
