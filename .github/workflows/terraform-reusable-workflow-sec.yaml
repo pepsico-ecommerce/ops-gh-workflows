@@ -79,7 +79,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ env.FILENAME }}
-          path: "${{ env.GITHUB_WORKSPACE }}/plan_output/"
+          path: ./plan_output/
 
       - name: Run Snyk to check configuration files for security issues
         continue-on-error: ${{ inputs.continue_on_error }}
@@ -89,17 +89,16 @@ jobs:
           args: --severity-threshold=high
 
       - run: |
-          echo $GITHUB_WORKSPACE
-          echo $HOME
+          printenv
+          pwd
+          ls -la
           ls -la $HOME
-          ls -la $GITHUB_WORKSPACE
-          ls -la $GITHUB_WORKSPACE/plan_output/
 
       - name: Run Snyk to check plan output for security issues
         continue-on-error: ${{ inputs.continue_on_error }}
         uses: snyk/actions/iac@master
         with:
-          file: ${{ env.GITHUB_WORKSPACE }}/plan_output/
+          file: ./plan_output/
           args: --severity-threshold=high
 
       # - name: Upload result to GitHub Code Scanning
