@@ -37,6 +37,8 @@ on:
         description: 'Branch, tag, or commit SHA against which the changes will be detected.'
         required: false
         type: string
+    outputs:
+      filename: ${{ steps.tf_plan_filename.outputs.filename }}
 
 jobs:
   find_environments:
@@ -90,13 +92,15 @@ jobs:
           target: ${{ inputs.terraform_target }}
 
       - name: generate filename for plan
+        id: tf_plan_filename
         run: |
           FILENAME=${{ steps.tf_plan.outputs.json_plan_path }}
           FILENAME=${FILENAME//\//_}
-          echo FILENAME="${FILENAME}-${{ github.sha }}" >> $GITHUB_ENV
+          echo "::set-output name=filename::${FILENAME}-${{ github.sha }}"
+          #echo FILENAME="${FILENAME}-${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Upload terraform plan
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.FILENAME }}
+          name: ${{ steps.tf_plan_filename.outputs.filename }}
           path: ${{ steps.tf_plan.outputs.json_plan_path }}
