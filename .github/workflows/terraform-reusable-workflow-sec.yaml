@@ -38,11 +38,6 @@ on:
         description: 'threshold for found issues low|medium|high|critical'
         required: false
         default: "high"
-      tf_plan_filename:
-        type: string
-        description: 'terraform plan name that should be downaloded from artifacts'
-        required: true
-        default: ""
     secrets:
       snyk_token:
         description: 'Snyk token for running scan'
@@ -85,10 +80,17 @@ jobs:
         with:
           ref: ${{ inputs.git_branch }}
 
+      - name: get filename for plan
+        id: tf_plan_filename
+        run: |
+          FILENAME=${{ matrix.environment }}
+          FILENAME=${FILENAME//\//_}-${{ github.sha }}
+          echo "::set-output name=filename::${FILENAME}"
+
       - name: Download terraform plan
         uses: actions/download-artifact@v3
         with:
-          name: ${{ inputs.tf_plan_filename }}
+          name: ${{ steps.tf_plan_filename.outputs.filename }}
           path: ./plan_output/
 
       - name: Run Snyk to check configuration files for security issues
