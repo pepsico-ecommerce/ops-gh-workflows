@@ -38,7 +38,7 @@ on:
         required: false
         type: string
     outputs:
-      filename: ${{ jobs.plan.outputs.filename }}
+      filename: ${{ env.FILENAME }}
 
 jobs:
   find_environments:
@@ -94,15 +94,15 @@ jobs:
           target: ${{ inputs.terraform_target }}
 
       - name: generate filename for plan
-        id: tf_plan_filename
+        #id: tf_plan_filename
         run: |
           FILENAME=${{ steps.tf_plan.outputs.json_plan_path }}
           FILENAME=${FILENAME//\//_}
-          echo "::set-output name=filename::${FILENAME}-${{ github.sha }}"
-          #echo FILENAME="${FILENAME}-${{ github.sha }}" >> $GITHUB_ENV
+          #echo "::set-output name=filename::${FILENAME}-${{ github.sha }}"
+          echo FILENAME="${FILENAME}-${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Upload terraform plan
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.tf_plan_filename.outputs.filename }}
+          name: ${{ env.FILENAME }}
           path: ${{ steps.tf_plan.outputs.json_plan_path }}
