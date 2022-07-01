@@ -75,25 +75,27 @@ jobs:
         with:
           ref: ${{ inputs.git_branch }}
 
+      - name: Download terraform plan
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.FILENAME }}
+          path: ~/plan_output/
+
       - name: Run Snyk to check configuration files for security issues
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the issues to GitHub Code Scanning
         continue-on-error: ${{ inputs.continue_on_error }}
         uses: snyk/actions/iac@master
         with:
           file: ./${{ matrix.environment }}
           args: --severity-threshold=high
 
+      - name: Run Snyk to check plan output for security issues
+        continue-on-error: ${{ inputs.continue_on_error }}
+        uses: snyk/actions/iac@master
+        with:
+          file: ~/plan_output/
+          args: --severity-threshold=high
+
       # - name: Upload result to GitHub Code Scanning
       #   uses: github/codeql-action/upload-sarif@v1
       #   with:
       #     sarif_file: snyk.sarif
-
-      - name: Download terraform plan
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ env.FILENAME }}
-
-      - run: |
-          pwd
-          ls -la
