@@ -92,4 +92,4 @@ jobs:
       - name: Download terraform plan
         uses: actions/download-artifact@v3
         with:
-          name: "${{ matrix.environment }}-${{ github.sha }}"
+          name: ${{ env.FILENAME }}

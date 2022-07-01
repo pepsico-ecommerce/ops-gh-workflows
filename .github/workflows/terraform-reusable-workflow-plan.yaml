@@ -89,8 +89,14 @@ jobs:
           path: ./${{ matrix.environment }}
           target: ${{ inputs.terraform_target }}
 
+      - name: generate filename for plan
+        run: |
+          FILENAME=${{ steps.tf_plan.outputs.json_plan_path }}
+          FILENAME=${FILENAME//\//_}
+          echo FILENAME=${FILENAME} >> $GITHUB_ENV
+
       - name: Upload terraform plan
         uses: actions/upload-artifact@v3
         with:
-          name: "${{ matrix.environment }}-${{ github.sha }}"
+          name: ${{ env.FILENAME }}
           path: ${{ steps.tf_plan.outputs.json_plan_path }}
