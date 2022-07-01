@@ -38,7 +38,9 @@ on:
         required: false
         type: string
     outputs:
-      filename: "${{ jobs.plan.outputs.filename }}"
+      filename:
+        value: ${{ jobs.plan.outputs.filename }}
+        description: "terraform plan output name stored in artifacts storage"
 
 jobs:
   find_environments:
