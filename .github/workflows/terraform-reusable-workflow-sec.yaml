@@ -33,6 +33,11 @@ on:
         default: false
         required: false
         description: 'if workflow should complete on error'
+      threshold:
+        type: string
+        description: 'threshold for found issues low|medium|high|critical'
+        required: false
+        default: "high"
     secrets:
       snyk_token:
         description: 'Snyk token for running scan'
@@ -75,13 +80,32 @@ jobs:
         with:
           ref: ${{ inputs.git_branch }}
 
+      - name: get filename for plan
+        id: tf_plan_filename
+        run: |
+          FILENAME=${{ matrix.environment }}
+          FILENAME=${FILENAME//\//_}-${{ github.sha }}
+          echo "::set-output name=filename::${FILENAME}"
+
+      - name: Download terraform plan
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ steps.tf_plan_filename.outputs.filename }}
+          path: ./plan_output/
+
       - name: Run Snyk to check configuration files for security issues
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the issues to GitHub Code Scanning
         continue-on-error: ${{ inputs.continue_on_error }}
         uses: snyk/actions/iac@master
         with:
           file: ./${{ matrix.environment }}
+          args: "--severity-threshold=${{ inputs.threshold }}"
+
+      - name: Run Snyk to check plan output for security issues
+        continue-on-error: ${{ inputs.continue_on_error }}
+        uses: snyk/actions/iac@master
+        with:
+          file: ./plan_output/
+          args: "--severity-threshold=${{ inputs.threshold }}"
 
       # - name: Upload result to GitHub Code Scanning
       #   uses: github/codeql-action/upload-sarif@v1
