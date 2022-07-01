@@ -38,7 +38,7 @@ on:
         required: false
         type: string
     outputs:
-      filename: ${{ steps.tf_plan_filename.outputs.filename }}
+      filename: ${{ jobs.plan.outputs.filename }}
 
 jobs:
   find_environments:
@@ -64,6 +64,8 @@ jobs:
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.find_environments.outputs.unique_directory_matrix) }}
+    outputs:
+      filename: ${{ steps.tf_plan_filename.outputs.filename }}
     if: ${{ needs.find_environments.outputs.unique_directory_matrix != '[]' }}
     runs-on: ${{ inputs.runner }}
     needs: find_environments
