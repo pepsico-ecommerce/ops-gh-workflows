@@ -84,6 +84,13 @@ jobs:
           aws-region: us-east-1
       - name: terraform plan
         uses: pepsico-ecommerce/ops-gh-actions-ext-terraform-github-actions/terraform-plan@v1.26.0
+        id: tf_plan
         with:
           path: ./${{ matrix.environment }}
           target: ${{ inputs.terraform_target }}
+
+      - name: Upload terraform plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{ matrix.environment }}-${{ github.sha }}"
+          path: ${{ steps.tf_plan.outputs.json_plan_path }}
