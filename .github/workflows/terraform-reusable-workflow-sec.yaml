@@ -33,6 +33,11 @@ on:
         default: false
         required: false
         description: 'if workflow should complete on error'
+      threshold:
+        type: string
+        description: 'threshold for found issues low|medium|high|critical'
+        required: false
+        default: "high"
     secrets:
       snyk_token:
         description: 'Snyk token for running scan'
@@ -86,20 +91,14 @@ jobs:
         uses: snyk/actions/iac@master
         with:
           file: ./${{ matrix.environment }}
-          args: --severity-threshold=high
-
-      - run: |
-          printenv
-          pwd
-          ls -la
-          ls -la $HOME
+          args: "--severity-threshold=${{ inputs.threshold }}"
 
       - name: Run Snyk to check plan output for security issues
         continue-on-error: ${{ inputs.continue_on_error }}
         uses: snyk/actions/iac@master
         with:
           file: ./plan_output/
-          args: --severity-threshold=high
+          args: "--severity-threshold=${{ inputs.threshold }}"
 
       # - name: Upload result to GitHub Code Scanning
       #   uses: github/codeql-action/upload-sarif@v1
